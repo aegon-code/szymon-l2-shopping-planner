@@ -126,13 +126,58 @@ const ITEMS = [
     "rule": "ไม่ระบุ"
   },
   {
+    "id": "21",
+    "name": "บัญชีพรีเมียม (30 วัน) Lv.1",
+    "qty": 1,
+    "price": 100,
+    "category": 2,
+    "limit": null,
+    "rule": "เฉพาะบัญชี ไม่มีของแถม · เลือก Premium ได้ 1 แบบ",
+    "choice": "premium",
+    "optional": true
+  },
+  {
+    "id": "22",
+    "name": "แพ็กบัญชีพรีเมียม Lv.1",
+    "qty": 1,
+    "price": 150,
+    "category": 2,
+    "limit": null,
+    "rule": "พร้อมของแถม · เลือก Premium ได้ 1 แบบ",
+    "choice": "premium",
+    "optional": true
+  },
+  {
+    "id": "23",
+    "name": "บัญชีพรีเมียม (30 วัน) Lv.2",
+    "qty": 1,
+    "price": 200,
+    "category": 2,
+    "limit": null,
+    "rule": "เฉพาะบัญชี ไม่มีของแถม · เลือก Premium ได้ 1 แบบ",
+    "choice": "premium",
+    "optional": true
+  },
+  {
     "id": "15",
     "name": "แพ็กบัญชีพรีเมียม Lv.2",
     "qty": 1,
     "price": 300,
     "category": 2,
     "limit": null,
-    "rule": "ไม่ระบุ"
+    "rule": "พร้อมของแถม · เลือก Premium ได้ 1 แบบ",
+    "choice": "premium"
+  },
+  {
+    "id": "24",
+    "name": "อากาธิออนแฮปปี้ (7 วัน)",
+    "qty": 1,
+    "price": 40,
+    "category": 3,
+    "limit": null,
+    "rule": "จ่ายน้อยกว่าแบบ 30 วัน 110 SG ต่อชิ้น",
+    "choice": "agathion16",
+    "optional": true
   },
   {
     "id": "16",
@@ -141,7 +186,19 @@ const ITEMS = [
     "price": 150,
     "category": 3,
     "limit": null,
-    "rule": "อายุใช้งาน 30 วัน"
+    "rule": "อายุใช้งาน 30 วัน",
+    "choice": "agathion16"
+  },
+  {
+    "id": "25",
+    "name": "อากาธิออนแดนซ์ (7 วัน)",
+    "qty": 1,
+    "price": 40,
+    "category": 3,
+    "limit": null,
+    "rule": "จ่ายน้อยกว่าแบบ 30 วัน 110 SG ต่อชิ้น",
+    "choice": "agathion17",
+    "optional": true
   },
   {
     "id": "17",
@@ -150,7 +207,19 @@ const ITEMS = [
     "price": 150,
     "category": 3,
     "limit": null,
-    "rule": "อายุใช้งาน 30 วัน"
+    "rule": "อายุใช้งาน 30 วัน",
+    "choice": "agathion17"
+  },
+  {
+    "id": "26",
+    "name": "อากาธิออนซอง (7 วัน)",
+    "qty": 1,
+    "price": 40,
+    "category": 3,
+    "limit": null,
+    "rule": "จ่ายน้อยกว่าแบบ 30 วัน 110 SG ต่อชิ้น",
+    "choice": "agathion18",
+    "optional": true
   },
   {
     "id": "18",
@@ -159,7 +228,8 @@ const ITEMS = [
     "price": 150,
     "category": 3,
     "limit": null,
-    "rule": "อายุใช้งาน 30 วัน"
+    "rule": "อายุใช้งาน 30 วัน",
+    "choice": "agathion18"
   },
   {
     "id": "19",
@@ -178,5 +248,15 @@ const ITEMS = [
     "category": 4,
     "limit": null,
     "rule": "อายุใช้งาน 7 วัน"
+  },
+  {
+    "id": "27",
+    "name": "ใบรับรองภารกิจ ×200",
+    "qty": 10,
+    "price": 20,
+    "category": 2,
+    "limit": null,
+    "rule": "ใช้ข้ามภารกิจ (Skip Mission) · 10 ครั้งได้ 2,000 ใบ",
+    "unit": "ครั้ง"
   }
 ];

@@ -7,13 +7,17 @@ const $=id=>document.getElementById(id);
 const fmt=n=>n.toLocaleString('en-US',{maximumFractionDigits:2});
 const bounded=(v,max)=>Math.max(0,Math.min(max,Math.floor(Number(v)||0)));
 const maxQty=i=>i.limit??Math.floor(Number.MAX_SAFE_INTEGER/(ITEMS.length*Math.max(i.price,8000)));
-const fresh=()=>({version:1,preset:'full',budget:'',rate:'',items:Object.fromEntries(ITEMS.map(i=>[i.id,{on:true,q:i.qty,b:0}]))});
+const fresh=()=>({version:1,preset:'full',budget:'',rate:'',items:Object.fromEntries(ITEMS.map(i=>[i.id,{on:!i.optional,q:i.qty,b:0}]))});
+function matchesFull(s){return ITEMS.every(i=>{const r=s.items[i.id];return r.on===!i.optional&&(!r.on||r.q===i.qty);});}
 function normalize(raw){
  if(raw?.version!==1||!raw.items||typeof raw.items!=='object')throw Error('invalid');
  const s=fresh();
- for(const i of ITEMS){const r=raw.items[i.id];if(!r)continue;s.items[i.id]={on:r.on===true,q:bounded(r.q,maxQty(i)),b:bounded(r.b,maxQty(i))};}
+ for(const i of ITEMS){const r=raw.items[i.id];if(!r){s.items[i.id].on=false;continue;}s.items[i.id]={on:r.on===true,q:bounded(r.q,maxQty(i)),b:bounded(r.b,maxQty(i))};}
  for(const k of ['budget','rate'])if(raw[k]!==''&&Number.isFinite(+raw[k])&&+raw[k]>=0)s[k]=String(+raw[k]);
- s.preset=['full','empty','custom'].includes(raw.preset)?raw.preset:'custom';return s;
+ s.preset=['full','empty','custom'].includes(raw.preset)?raw.preset:'custom';const active=new Set();
+ for(const i of ITEMS){const r=s.items[i.id];if(!r.on||!i.choice)continue;if(active.has(i.choice))r.on=false;else active.add(i.choice);}
+ if(s.preset==='full'&&!matchesFull(s))s.preset='custom';
+ return s;
 }
 let state=fresh(),preview=false,timer;
 try{const saved=localStorage.getItem(key);if(saved)state=normalize(JSON.parse(saved));}catch{}
@@ -38,7 +42,7 @@ function dashboard(){
 }
 function row(i){
  const r=state.items[i.id],icon=ICONS[Number(i.id)],status=r.b===0?'ยังไม่ได้ซื้อ':r.on&&r.b<r.q?'ซื้อบางส่วน':'ซื้อแล้ว';
- return '<div class="row" data-id="'+i.id+'"><input data-field="on" aria-label="เลือก '+i.name+'" type="checkbox" '+(r.on?'checked':'')+'>'+(icon?'<img class="icon" alt="" src="'+icon+'">':'<span class="icon" title="ไอคอนชั่วคราว">'+SIGNS[i.category]+'</span>')+'<div class="item">'+i.name+'<small>'+fmt(i.price)+' SG/หน่วย · แนะนำ '+i.qty+' · '+(i.rule==='ไม่ระบุ'?'ข้อจำกัดไม่ระบุ':i.rule)+'</small></div><div class="counter"><button data-delta="-1" aria-label="ลดจำนวน '+i.name+'">−</button><input type="number" min="0" step="1" data-field="q" aria-label="จำนวนตามแผน '+i.name+'" value="'+r.q+'"><button data-delta="1" aria-label="เพิ่มจำนวน '+i.name+'">+</button></div><div class="cost">'+fmt(r.on?r.q*i.price:0)+' SG</div><label class="bought">ซื้อแล้ว <input type="number" min="0" step="1" data-field="b" aria-label="ซื้อแล้ว '+i.name+'" value="'+r.b+'"><small>'+status+'</small></label></div>';
+ return '<div class="row" data-id="'+i.id+'"><input data-field="on" aria-label="เลือก '+i.name+'" type="checkbox" '+(r.on?'checked':'')+'>'+(icon?'<img class="icon" alt="" src="'+icon+'">':'<span class="icon" title="ไอคอนชั่วคราว">'+SIGNS[i.category]+'</span>')+'<div class="item">'+i.name+'<small>'+fmt(i.price)+' SG/'+(i.unit||'หน่วย')+' · แนะนำ '+i.qty+(i.unit?' '+i.unit:'')+' · '+(i.rule==='ไม่ระบุ'?'ข้อจำกัดไม่ระบุ':i.rule)+'</small></div><div class="counter"><button data-delta="-1" aria-label="ลดจำนวน '+i.name+'">−</button><input type="number" min="0" step="1" data-field="q" aria-label="จำนวนตามแผน '+i.name+'" value="'+r.q+'"><button data-delta="1" aria-label="เพิ่มจำนวน '+i.name+'">+</button></div><div class="cost">'+fmt(r.on?r.q*i.price:0)+' SG</div><label class="bought">ซื้อแล้ว <input type="number" min="0" step="1" data-field="b" aria-label="ซื้อแล้ว '+i.name+'" value="'+r.b+'"><small>'+status+'</small></label></div>';
 }
 function render(){
  const search=$('search').value.trim().toLowerCase(),c=$('cat').value,a=totals();
@@ -49,7 +53,19 @@ function updateRow(el,editing=false){const node=el.closest('.row'),i=ITEMS.find(
  if(field==='on'){r.on=el.checked;if(r.on&&!r.q)r.q=i.qty;}
  else if(field==='b'){r.b=bounded(el.value,maxQty(i)); }
  else{r.q=bounded(el.dataset.delta? r.q+Number(el.dataset.delta):el.value,maxQty(i));r.on=r.q>0;}
- if(field!=='b')state.preset='custom';
+ if(field!=='b'){
+  state.preset='custom';
+  if(r.on&&i.choice){
+   for(const other of ITEMS){
+    if(other.id===i.id||other.choice!==i.choice)continue;
+    state.items[other.id].on=false;
+    if(editing){
+     const peer=document.querySelector('.row[data-id="'+other.id+'"]');
+     if(peer)peer.outerHTML=row(other);
+    }
+   }
+  }
+ }
  save();
  if(!editing){render();return;}
  if(el.value!=='' && Number(el.value)!==r[field])el.value=r[field];
@@ -67,7 +83,7 @@ $('rows').onfocusout=e=>{if(e.target.type==='number'&&e.target.value==='')e.targ
 $('cat').insertAdjacentHTML('beforeend',GROUPS.map((v,j)=>'<option value="'+j+'">'+v+'</option>').join(''));
 $('cat').onchange=render;$('search').oninput=render;
 function setBuild(mode){
- state.preset=mode;for(const i of ITEMS){const r=state.items[i.id];if(mode==='full'){r.on=true;r.q=i.qty;}else if(mode==='empty'){r.on=false;r.q=0;}}
+ state.preset=mode;for(const i of ITEMS){const r=state.items[i.id];if(mode==='full'){r.on=!i.optional;r.q=i.qty;}else if(mode==='empty'){r.on=false;r.q=0;}}
  save();render();
 }
 $('preset').onchange=e=>setBuild(e.target.value);
@@ -85,7 +101,15 @@ function exportPng(){
 document.addEventListener('click',async e=>{
  const action=e.target.closest('[data-act]')?.dataset.act;if(!action)return;
  if(action==='recommended')setBuild('full');
- if(action==='all'){for(const i of ITEMS){const r=state.items[i.id];r.on=true;if(!r.q)r.q=i.qty;}state.preset=ITEMS.every(i=>state.items[i.id].q===i.qty)?'full':'custom';save();render();}
+ if(action==='all'){
+  const chosen=new Set(ITEMS.filter(i=>i.choice&&state.items[i.id].on).map(i=>i.choice));
+  for(const i of ITEMS){
+   const r=state.items[i.id];
+   if(i.choice&&(chosen.has(i.choice)||i.optional))continue;
+   r.on=true;if(!r.q)r.q=i.qty;
+  }
+  state.preset=matchesFull(state)?'full':'custom';save();render();
+ }
  if(action==='clear')setBuild('empty');
  if(action==='reset'){modal('<h2>ล้างข้อมูลทั้งหมด?</h2><p>รายการตามแผน ประวัติซื้อ งบ และอัตราแลกเปลี่ยนในเบราว์เซอร์นี้จะถูกล้าง</p><button data-act="cancel">ยกเลิก</button><button data-act="confirmreset">ยืนยันล้างข้อมูล</button>');}
  if(action==='confirmreset'){state=fresh();setBuild('empty');$('modal').close();}

@@ -17,5 +17,12 @@ const ICONS = {
   "16": "item-16.webp",
   "17": "item-17.webp",
   "18": "item-18.webp",
-  "20": "item-20.webp"
+  "20": "item-20.webp",
+  "21": "item-21.webp",
+  "22": "item-22.webp",
+  "23": "item-23.webp",
+  "24": "item-24.webp",
+  "25": "item-25.webp",
+  "26": "item-26.webp",
+  "27": "item-27.webp"
 };
