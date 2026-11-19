@@ -1,0 +1,21 @@
+const ICONS = {
+  "1": "item-01.webp",
+  "2": "item-02.webp",
+  "3": "item-03.webp",
+  "4": "item-04.webp",
+  "5": "item-05.webp",
+  "6": "item-06.webp",
+  "7": "item-07.webp",
+  "8": "item-08.webp",
+  "9": "item-09.webp",
+  "10": "item-10.webp",
+  "11": "item-11.webp",
+  "12": "item-12.webp",
+  "13": "item-13.webp",
+  "14": "item-14.webp",
+  "15": "item-15.webp",
+  "16": "item-16.webp",
+  "17": "item-17.webp",
+  "18": "item-18.webp",
+  "20": "item-20.webp"
+};
